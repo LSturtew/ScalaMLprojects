@@ -17,6 +17,7 @@ build/project/
 .scala_dependencies
 .cache
 .cache-main
+.bsp/
 
 #general
 *.class
