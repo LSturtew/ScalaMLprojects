@@ -5,7 +5,6 @@ import org.apache.spark.sql.DataFrame
 
 object Extract {
   Logger.getLogger("org.apache.spark").setLevel(Level.ERROR)
-
   lazy val spark = SparkWrapper.createSession()
   import spark.implicits._
 
@@ -15,5 +14,6 @@ object Extract {
       .option("inferSchema", "true")
       .format("com.databricks.spark.csv")
       .load(filePath)
+      .cache
   }
 }
