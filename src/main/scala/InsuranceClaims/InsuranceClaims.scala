@@ -27,7 +27,11 @@ object InsuranceClaims extends App {
   validationData.cache
   testInput.cache
 
+  val featureColumns = Extract.getFeatureColumns(trainingData.columns)
+  logger.info(featureColumns.size + " feature columns selected")
 
+  val encoder = Extract.createCategoricalDataEncoder(trainingData.columns,trainingData,testInput)
+  val assembly = Extract.createFeatureAssembly(featureColumns)
 
   logger.info("Done :) closing spark")
   Extract.spark.close
