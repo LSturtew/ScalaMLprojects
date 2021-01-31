@@ -52,23 +52,23 @@ class InsuranceClaimsSpec extends FunSpec with SparkSessionTestWrapper with Data
     }
     it("should return true for column cat1"){
       val column = "cat1"
-      assert(Extract.removeLatsCategories(column))
+      assert(Extract.isNotNeededCategory(column))
     }
     it("should return false for column cat109"){
       val column = "cat109"
-      assert(!Extract.removeLatsCategories(column))
+      assert(!Extract.isNotNeededCategory(column))
     }
     it("should return true for column cat2"){
       val column = "cat2"
-      assert(Extract.onlyFeatureColumns(column))
+      assert(Extract.isFeature(column))
     }
     it("should return false for column id"){
       val column = "id"
-      assert(!Extract.onlyFeatureColumns(column))
+      assert(!Extract.isFeature(column))
     }
     it("should return false for column label"){
       val column = "label"
-      assert(!Extract.onlyFeatureColumns(column))
+      assert(!Extract.isFeature(column))
     }
     it("should return 125 feature columns"){
       val columns = Extract.getFeatureColumns(Extract.renameLabelColumn(trainData,"loss").columns)

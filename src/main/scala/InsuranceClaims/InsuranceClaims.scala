@@ -28,7 +28,7 @@ object InsuranceClaims extends App {
   testInput.cache
 
   val featureColumns = Extract.getFeatureColumns(trainingData.columns)
-  logger.info(featureColumns.size + " feature columns selected")
+  logger.info(featureColumns.length + " feature columns selected")
 
   val encoder = Extract.createCategoricalDataEncoder(trainingData.columns,trainingData,testInput)
   val assembly = Extract.createFeatureAssembly(featureColumns)

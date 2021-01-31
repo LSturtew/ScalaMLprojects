@@ -24,6 +24,8 @@ object Extract {
     trainData.withColumnRenamed(labelColumn,"label")
   }
 
+  def renameCategoryColumns(column:String):String = if (isCategory(column)) s"idx_$column" else column
+
   def splitTrainingSet(trainData:DataFrame, seed: Long, validationSize:Double): (DataFrame,DataFrame) = {
     logger.info("Split training data into train set and validation set, seed: "+seed+", validation set size: "+ validationSize)
     val splits = trainData.randomSplit(Array(1-validationSize,validationSize),seed)
@@ -32,16 +34,14 @@ object Extract {
 
   def isCategory(column: String): Boolean = column.startsWith("cat")
 
-  def renameCategoryColumns(column:String):String = if (isCategory(column)) s"idx_$column" else column
+  def isNotNeededCategory(column: String): Boolean = !(column matches "cat(109$|110$|112$|113$|116$)")
 
-  def removeLatsCategories(column: String): Boolean = !(column matches "cat(109$|110$|112$|113$|116$)")
-
-  def onlyFeatureColumns(column: String): Boolean = !(column matches "id|label")
+  def isFeature(column: String): Boolean = !(column matches "id|label")
 
   def getFeatureColumns(columns: Array[String]): Array[String] ={
     logger.info("Get feature columns")
-    columns.filter(removeLatsCategories)
-      .filter(onlyFeatureColumns)
+    columns.filter(isNotNeededCategory)
+      .filter(isFeature)
       .map(renameCategoryColumns)
   }
 
