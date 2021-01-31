@@ -18,6 +18,8 @@ build/project/
 .cache
 .cache-main
 .bsp/
+model/
+output/
 
 #general
 *.class
