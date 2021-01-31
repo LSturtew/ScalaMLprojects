@@ -81,7 +81,14 @@ object Model1LinearRegression {
 
   def createRegressionMetrics(predictions:RDD[(Double,Double)]): RegressionMetrics ={
     logger.info("Calculating regression metrics")
-    new RegressionMetrics(predictions)
+    val rm = new RegressionMetrics(predictions)
+
+    logger.info("Metrics")
+    logger.info("Explained Variance: " + rm.explainedVariance)
+    logger.info("R^2 Coef: " + rm.r2)
+    logger.info("MSE: " + rm.meanSquaredError)
+    logger.info("RMSE: " + rm.rootMeanSquaredError)
+    rm
   }
 
   def getBestModel(model:CrossValidatorModel): PipelineModel ={

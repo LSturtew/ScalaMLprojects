@@ -50,23 +50,6 @@ object InsuranceClaims extends App {
   logger.info("==========================================================================")
   val bestModel = Model1LinearRegression.getBestModel(fittedModel)
   Model1LinearRegression.predict(fittedModel,testInput)
-  val results = "\n=====================================================================\n" +
-    ("Training data MSE = " + trainRegressionMetrics.meanSquaredError + "\n") +
-    ("Training data RMSE = " + trainRegressionMetrics.rootMeanSquaredError + "\n") +
-    ("Training data R-squared = " + trainRegressionMetrics.r2 + "\n") +
-    ("Training data MAE = " + trainRegressionMetrics.meanAbsoluteError + "\n") +
-    ("Training data Explained variance = " + trainRegressionMetrics.explainedVariance + "\n") +
-    "=====================================================================\n" +
-    ("Validation data MSE = " + validationRegressionMetrics.meanSquaredError + "\n") +
-    ("Validation data RMSE = " + validationRegressionMetrics.rootMeanSquaredError + "\n") +
-    ("Validation data R-squared = " + validationRegressionMetrics.r2 + "\n") +
-    ("Validation data MAE = " + validationRegressionMetrics.meanAbsoluteError + "\n") +
-    ("Validation data Explained variance = " + validationRegressionMetrics.explainedVariance + "\n") +
-    "=====================================================================\n"+
-    ("CV params explained: " + fittedModel.explainParams + "\n") +
-    ("GBT params explained: " + bestModel.stages.last.asInstanceOf[LinearRegressionModel].explainParams + "\n") +
-    "=====================================================================\n"
-  println(results)
   logger.info("Done :) closing spark")
   Extract.spark.close
 }
