@@ -7,10 +7,27 @@ object InsuranceClaims extends App {
   val train = "src/main/resources/InsuranceClaims/train.csv"
   val test = "src/main/resources/InsuranceClaims/test.csv"
 
-  logger.info("Reading data from " + train + " file")
+
   val trainInput = Extract.readInputData(train)
-  logger.info("Reading data from " + test + " file")
+  val trainCount =  trainInput.count()
+  logger.info("Train data count: " + trainCount)
   val testInput = Extract.readInputData(test)
+  val testCount = testInput.count()
+  logger.info("Test data count: " + testCount)
+
+  logger.info("Preparing data for training model")
+  val data = Extract.renameLabelColumn(trainInput,"loss")
+  data.na.drop()
+  logger.info("Removed " + (trainCount - data.count()) + " rows containing null values.")
+
+  val (trainingData, validationData) = Extract.splitTrainingSet(data,12345L,0.25)
+
+  logger.info("Caching the data")
+  trainingData.cache
+  validationData.cache
+  testInput.cache
+
+
 
   logger.info("Done :) closing spark")
   Extract.spark.close
