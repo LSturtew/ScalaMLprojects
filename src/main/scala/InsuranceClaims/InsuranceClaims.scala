@@ -63,7 +63,7 @@ object InsuranceClaims extends App {
     ("Validation data MAE = " + validationRegressionMetrics.meanAbsoluteError + "\n") +
     ("Validation data Explained variance = " + validationRegressionMetrics.explainedVariance + "\n") +
     "=====================================================================\n"+
-    ("CV params explained: " + model.explainParams + "\n") +
+    ("CV params explained: " + fittedModel.explainParams + "\n") +
     ("GBT params explained: " + bestModel.stages.last.asInstanceOf[LinearRegressionModel].explainParams + "\n") +
     "=====================================================================\n"
   println(results)

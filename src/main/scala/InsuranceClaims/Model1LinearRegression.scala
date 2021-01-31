@@ -66,7 +66,6 @@ object Model1LinearRegression {
     } else {
       logger.info("Fit linear regression algorithm")
       val fitted = cv.fit(trainingData)
-      logger.info("CV params explained: " + fitted.explainParams)
       logger.info("Saving model")
       fitted.write.overwrite().save(path)
       fitted
