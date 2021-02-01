@@ -3,7 +3,7 @@ package InsuranceClaims
 import org.apache.log4j.Logger
 import org.apache.spark.ml.evaluation.RegressionEvaluator
 import org.apache.spark.ml.feature.{StringIndexerModel, VectorAssembler}
-import org.apache.spark.ml.regression.{LinearRegression, LinearRegressionModel}
+import org.apache.spark.ml.regression.{GBTRegressionModel, GBTRegressor, LinearRegressionModel}
 import org.apache.spark.ml.tuning.{CrossValidator, CrossValidatorModel, ParamGridBuilder}
 import org.apache.spark.ml.{Pipeline, PipelineModel}
 import org.apache.spark.mllib.evaluation.RegressionMetrics
@@ -11,26 +11,26 @@ import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 
 import java.nio.file.{FileSystems, Files}
 
+object Model2GradientBoostTrees {
 
-object Model1LinearRegression {
-
-  val logger: Logger = Logger.getLogger(this.getClass)
-
-  val numFolds = 10
-  val maxIter: Seq[Int] = Seq(1000)
-  val regParam: Seq[Double] = Seq(0.001)
-  val tol: Seq[Double] = Seq(1e-6)
-  val elasticNetParam: Seq[Double] = Seq(0.001)
+  val numTrees: Seq[Int] = Seq(5, 10, 15)
+  val maxBins: Seq[Int] = Seq(5, 7, 9)
+  val numFolds: Int = 10
+  val maxIter: Seq[Int] = Seq(10)
+  val maxDepth: Seq[Int] = Seq(10)
 
   def train(spark: SparkSession,
             trainData: DataFrame,
             validationData: DataFrame,
             testData: DataFrame,
             encoder: Array[StringIndexerModel],
-            assembler: VectorAssembler): Unit = {
+            assembler: VectorAssembler,
+            featureColumns: Array[String]): Unit = {
     import spark.implicits._
-    logger.info("Creating a linear regression model")
-    val model = new LinearRegression()
+    val logger: Logger = Logger.getLogger(this.getClass)
+
+    logger.info("Creating a gradient boost trees model")
+    val model = new GBTRegressor()
       .setFeaturesCol("features")
       .setLabelCol("label")
 
@@ -42,9 +42,8 @@ object Model1LinearRegression {
     logger.info("Param maxIter: " + maxIter)
     val paramGrid = new ParamGridBuilder()
       .addGrid(model.maxIter, maxIter)
-      .addGrid(model.regParam, regParam)
-      .addGrid(model.tol, tol)
-      .addGrid(model.elasticNetParam, elasticNetParam)
+      .addGrid(model.maxDepth, maxDepth)
+      .addGrid(model.maxBins, maxBins)
       .build()
 
     logger.info("Creating cross validator")
@@ -56,18 +55,17 @@ object Model1LinearRegression {
       .setNumFolds(numFolds)
 
     def fitModel(trainingData: DataFrame, cv: CrossValidator): CrossValidatorModel = {
-      val path: String = "model/InsuranceClaims/Model1LinearRegression"
+      val path: String = "model/InsuranceClaims/Model2GradientBoostTrees"
       if (Files.exists(FileSystems.getDefault.getPath(path))) {
-        logger.info("Loading linear regression model")
+        logger.info("Loading GBT model")
         CrossValidatorModel.load(path)
       } else {
-        logger.info("Fit linear regression algorithm")
+        logger.info("Fit GBT algorithm")
         val fitted = cv.fit(trainingData)
         logger.info("Saving model")
         fitted.write.overwrite().save(path)
         fitted
       }
-
     }
 
     val fittedModel = fitModel(trainData, cv)
@@ -94,8 +92,13 @@ object Model1LinearRegression {
     logger.info("Get best model")
     val bestModel = fittedModel.bestModel.asInstanceOf[PipelineModel]
 
+    val featureImportance = bestModel.stages.last.asInstanceOf[GBTRegressionModel].featureImportances.toArray
+
+    val sortedFeatureList = featureImportance.toList.sorted.toArray
+
     logger.info("CV params explained: " + fittedModel.explainParams)
-    logger.info("LR params explained: " + bestModel.stages.last.asInstanceOf[LinearRegressionModel].explainParams)
+    logger.info("GBT params explained: " + bestModel.stages.last.asInstanceOf[LinearRegressionModel].explainParams)
+    logger.info("GBT features explained: " + featureColumns.zip(sortedFeatureList).map(t => s"\t${t._1} = ${t._2}").mkString("\n"))
 
     logger.info("Predicting loss for test data and saving results")
     fittedModel.transform(testData)
@@ -105,7 +108,8 @@ object Model1LinearRegression {
       .write.format("com.databricks.spark.csv")
       .mode("overwrite")
       .option("header", "true")
-      .save("output/InsuranceClaims/resultLinearRegression.csv")
+      .save("output/InsuranceClaims/resultGradientBoostTrees.csv")
+
   }
 
 }
