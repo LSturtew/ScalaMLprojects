@@ -6,10 +6,8 @@ import org.apache.spark.sql.{DataFrame, SparkSession}
 
 object Extract {
   val logger:Logger = Logger.getLogger(this.getClass)
-  Logger.getLogger("org.apache.spark").setLevel(Level.ERROR)
-  lazy val spark:SparkSession = SparkWrapper.createSession()
 
-  def readInputData(filePath:String): DataFrame = {
+  def readInputData(spark:SparkSession,filePath:String): DataFrame = {
     logger.info("Reading data from " + filePath + " file")
     spark.read
       .option("header", "true")

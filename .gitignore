@@ -20,6 +20,7 @@ build/project/
 .bsp/
 model/
 output/
+.DS_Store
 
 #general
 *.class

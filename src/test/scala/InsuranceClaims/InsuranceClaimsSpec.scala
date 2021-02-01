@@ -2,14 +2,17 @@ package InsuranceClaims
 
 import org.scalatest.FunSpec
 import com.github.mrpowers.spark.fast.tests.DataFrameComparer
+import org.apache.log4j.{Level, Logger}
 import org.apache.spark.sql.DataFrame
 
 class InsuranceClaimsSpec extends FunSpec with SparkSessionTestWrapper with DataFrameComparer {
+
+  Logger.getLogger("org.apache.spark").setLevel(Level.ERROR)
   val filePathTrain = "src/test/resources/InsuranceClaims/train.csv"
   val filePathTest = "src/test/resources/InsuranceClaims/test.csv"
 
-  val trainData: DataFrame = Extract.readInputData(filePathTrain)
-  val testData: DataFrame = Extract.readInputData(filePathTest)
+  val trainData: DataFrame = Extract.readInputData(spark,filePathTrain)
+  val testData: DataFrame = Extract.readInputData(spark,filePathTest)
 
   import spark.implicits._
 
