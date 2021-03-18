@@ -2,6 +2,8 @@ package InsuranceClaims
 
 import org.apache.log4j.Logger
 import org.apache.spark.ml.feature.{StringIndexer, StringIndexerModel, VectorAssembler}
+import org.apache.spark.sql.functions._
+import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
 object Extract {
@@ -15,6 +17,19 @@ object Extract {
       .format("com.databricks.spark.csv")
       .load(filePath)
       .cache
+  }
+  def getStringColumnProfile(df: DataFrame, columnName: String): DataFrame = {
+    df.select(columnName)
+      .withColumn("isEmpty", when(col(columnName) === "", true).otherwise(null))
+      .withColumn("isNull", when(col(columnName).isNull, true).otherwise(null))
+      .withColumn("fieldLen", length(col(columnName)))
+      .agg(
+        max(col("fieldLen")).as("maxLength"),
+        countDistinct(columnName).as("unique"),
+        count("isEmpty").as("isEmpty"),
+        count("isNull").as("isNull")
+      )
+      .withColumn("colName", lit(columnName))
   }
 
   def renameLabelColumn(trainData: DataFrame, labelColumn: String): DataFrame = {

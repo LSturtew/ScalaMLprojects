@@ -5,10 +5,11 @@ import org.apache.spark.sql.SparkSession
 
 
 object InsuranceClaims extends App {
+  Logger.getLogger("org").setLevel(Level.WARN)
   Logger.getLogger("org.apache.spark").setLevel(Level.ERROR)
   val logger = Logger.getLogger(this.getClass)
   logger.info("Starting spark")
-  lazy val spark: SparkSession = SparkWrapper.createSession()
+  lazy val spark: SparkSession = SparkWrapper.createSession("InsuranceClaims")
 
   val train = "src/main/resources/InsuranceClaims/train.csv"
   val test = "src/main/resources/InsuranceClaims/test.csv"
@@ -34,7 +35,6 @@ object InsuranceClaims extends App {
   trainingData.cache
   validationData.cache
   testInput.cache
-
   val featureColumns = Extract.getFeatureColumns(trainingData.columns)
   logger.info(featureColumns.length + " feature columns selected")
   logger.info("==========================================================================")

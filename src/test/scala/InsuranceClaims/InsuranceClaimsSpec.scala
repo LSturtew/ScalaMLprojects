@@ -2,12 +2,15 @@ package InsuranceClaims
 
 import com.github.mrpowers.spark.fast.tests.DataFrameComparer
 import org.apache.log4j.{Level, Logger}
-import org.apache.spark.sql.DataFrame
+import org.apache.spark.sql.{DataFrame, Row}
+import org.apache.spark.sql.types.{IntegerType, StringType, StructField, StructType}
 import org.scalatest.FunSpec
 
 class InsuranceClaimsSpec extends FunSpec with SparkSessionTestWrapper with DataFrameComparer {
 
+  Logger.getLogger("org").setLevel(Level.WARN)
   Logger.getLogger("org.apache.spark").setLevel(Level.ERROR)
+  
   val filePathTrain = "src/test/resources/InsuranceClaims/train.csv"
   val filePathTest = "src/test/resources/InsuranceClaims/test.csv"
 
@@ -31,6 +34,13 @@ class InsuranceClaimsSpec extends FunSpec with SparkSessionTestWrapper with Data
     it("should have the same number of rows before and after splitting") {
       val (trainingData, validationData) = Extract.splitTrainingSet(trainData, 12345L, 0.2)
       assert(trainingData.count() + validationData.count() == trainData.count())
+    }
+  }
+
+  describe("Data description") {
+    it("should describe a categorical column"){
+      val result = Extract.getStringColumnProfile(trainData, "cat1")
+      assert(result.columns === Array("maxLength","unique","isEmpty","isNull","colName"))
     }
   }
 

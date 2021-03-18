@@ -14,7 +14,7 @@ import java.nio.file.{FileSystems, Files}
 object Model2GradientBoostTrees {
 
   val numTrees: Seq[Int] = Seq(5, 10, 15)
-  val maxBins: Seq[Int] = Seq(5, 7, 9)
+  val maxBins: Seq[Int] = Seq(32)
   val numFolds: Int = 10
   val maxIter: Seq[Int] = Seq(10)
   val maxDepth: Seq[Int] = Seq(10)
@@ -97,7 +97,7 @@ object Model2GradientBoostTrees {
     val sortedFeatureList = featureImportance.toList.sorted.toArray
 
     logger.info("CV params explained: " + fittedModel.explainParams)
-    logger.info("GBT params explained: " + bestModel.stages.last.asInstanceOf[LinearRegressionModel].explainParams)
+    logger.info("GBT params explained: " + bestModel.stages.last.asInstanceOf[GBTRegressionModel].explainParams)
     logger.info("GBT features explained: " + featureColumns.zip(sortedFeatureList).map(t => s"\t${t._1} = ${t._2}").mkString("\n"))
 
     logger.info("Predicting loss for test data and saving results")
